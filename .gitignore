@@ -1,0 +1,19 @@
+# 파이썬
+backend/.venv/
+**/__pycache__/
+*.pyc
+
+# 서드파티 (고정 커밋 클론 — SETUP.md 8절 재현 절차로 복원)
+backend/third_party/
+
+# 산출물 · 캐시 · 로컬 상태
+backend/outputs/
+backend/cache/
+backend/settings.json
+backend/bin/*.exe
+
+# 프론트엔드
+app/node_modules/
+app/dist/
+app/src-tauri/target/
+app/src-tauri/gen/
