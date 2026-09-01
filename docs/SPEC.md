@@ -49,11 +49,39 @@
 | 항목 | 요구 | 비고 |
 |---|---|---|
 | OS | Windows 11 | 실측: Education 26200 |
-| GPU | CUDA GPU, VRAM 12GB 이상 권장 | 실측: RTX 4090 24GB. Supertonic만 쓰면 GPU 불필요 |
+| GPU | 2.1.1 등급표 참조 (**최소 12GB · 전 기능 16GB · 한국어 전용은 GPU 불필요**) | **RTX 30 시리즈(Ampere) 이상** — 두 GPU 엔진이 bf16 고정이라 20 시리즈(Turing)는 미지원 |
+| RAM | 16GB 이상 권장 | 모델 로드 버퍼 + Supertonic CPU 경로 |
+| 디스크 | 모델 일습 약 16GB | 2.3 디렉터리 표준 참조 |
 | Python | 3.11 (python.org) | `C:\ai\python311` — venv의 base 경로가 ASCII여야 함 |
 | Node | 20+ | 프론트 빌드용 |
 | Rust | stable | Tauri 빌드용 |
 | WebView2 | Evergreen | Windows 11 기본 탑재 |
+
+#### 2.1.1 GPU·VRAM 등급 (실측 기반)
+
+GPU 엔진은 동시에 올라가지 않으므로(3.4) 요구 VRAM은 **가장 무거운 단일 조합**이 결정한다.
+Windows 자체(WDDM·DWM 등)가 1~2.5GB를 상시 점유하므로 카드 총량이 아니라 가용량으로 계산할 것.
+
+실측 점유(RTX 4090):
+
+| 조합 | 상주 | 피크(프로세스) |
+|---|---|---|
+| Supertonic (한국어) | 0 GB — CPU 실행 | 0 GB |
+| VibeVoice 1.5B (bf16) | 5.04 GB | 5.85 GB(단문) / 약 6.8 GB(6분30초 장문 — KV 캐시 증가) |
+| Dia2 2B (CUDA 그래프) | 7.64 GB | 8.68 GB |
+| Dia2 + 클로닝(whisper-large-v3 CUDA 상주) | 약 10.7 GB | 약 11~12 GB |
+
+배포 사양 등급:
+
+| VRAM | 판정 | 범위 |
+|---|---|---|
+| GPU 없음 | 가능 | 한국어(Supertonic)만 — CPU RTF 0.29로 실사용 무리 없음 |
+| 8 GB | 조건부 | VibeVoice 단독·중간 길이까지. 장문은 데스크톱 점유에 따라 OOM 위험. Dia2 사실상 불가(피크 8.7) |
+| **12 GB** | **최소 권장** | VibeVoice 전 범위 + Dia2 기본 모드(줄 단위). 클로닝은 아슬아슬 |
+| **16 GB** | **전 기능 권장** | 클로닝 포함 전 기능 + 장문 여유 |
+| 24 GB | 넉넉 | 개발 환경(실측 기준). 필수 아님 |
+
+향후 여지: 12GB에서 클로닝을 지원하려면 whisper 전사를 CPU로 돌리는 옵션(전사 시간 증가, VRAM 약 3.5GB 절약)을 추가할 수 있다 — 현재 미구현.
 
 ### 2.2 금지·제약 (원 지침에서 계승)
 
